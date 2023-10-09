@@ -1,0 +1,81 @@
+const fs = require('fs');
+
+const autoresponsePath = './database/messresponse.json';
+
+/**
+ * Menambahkan autoresponse ke database
+ * @param {String} guildId 
+ * @param {String} key
+ * @param {String} response 
+ * @param {String} attachment
+ */
+function addResponseToList(guildId, key, response, attachment) {
+    const autoresponse = JSON.parse(fs.readFileSync(autoresponsePath));
+    
+    const respond = {
+        id: guildId,
+        key: key,
+        message: response,
+        attachment: attachment,
+    };
+    
+    autoresponse.push(respond);
+    
+    fs.writeFileSync(autoresponsePath, JSON.stringify(autoresponse, null, 3));
+}
+
+function getDataFromResponseList(guildId, key, autoresponse) {
+    const position = autoresponse.findIndex(item => item.id === guildId && item.key === key);
+    
+    if (position !== -1) {
+        return autoresponse[position];
+    }
+    return null;
+}
+
+function isAlreadyInResponseList(guildId, key, autoresponse) {
+    return autoresponse.some(item => item.id === guildId && item.key === key);
+}
+
+function sendResponseFromList(guildId, key, autoresponse) {
+    const item = getDataFromResponseList(guildId, key, autoresponse);
+    
+    if (item) {
+        return item.message;
+    }
+    return null;
+}
+
+function isAlreadyInResponseListGroup(guildId, autoresponse) {
+    return autoresponse.some(item => item.id === guildId);
+}
+
+function deleteResponseFromList(guildId, key, autoresponse) {
+    const position = autoresponse.findIndex(item => item.id === guildId && item.key === key);
+    
+    if (position !== -1) {
+        autoresponse.splice(position, 1);
+        fs.writeFileSync(autoresponsePath, JSON.stringify(autoresponse, null, 3));
+    }
+}
+
+function updateResponseInList(guildId, key, response, autoresponse) {
+    autoresponse.forEach(item => {
+        if (item.id === guildId && item.key === key) {
+            item.key = key; // Ganti dengan nilai yang baru
+            item.message = response; // Ganti dengan nilai yang baru
+        }
+    });
+
+    fs.writeFileSync(autoresponsePath, JSON.stringify(autoresponse, null, 3));
+}
+
+module.exports = {
+    addResponseToList,
+    deleteResponseFromList,
+    isAlreadyInResponseList,
+    isAlreadyInResponseListGroup,
+    sendResponseFromList,
+    updateResponseInList,
+    getDataFromResponseList
+};

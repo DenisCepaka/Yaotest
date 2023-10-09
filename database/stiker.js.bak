@@ -1,0 +1,49 @@
+const fs = require('fs')
+const client = require("..");
+const userId = message.author.id
+/**
+ * GET db
+**/
+const _registered = JSON.parse(fs.readFileSync('./database/stiker.json'))
+
+/**
+ * GET random user from db
+ * return {string}
+**/
+const getRegisteredRandomId = () => {
+    return _registered[Math.floor(Math.random() * _registered.length)].id
+}
+
+/**
+ * add user to db
+ * @param {String} userId 
+ * @param {String} name 
+ * @param {String} age 
+ * @param {String} time
+**/
+const addRegisteredUser = (userid, name, age, time) => {
+    const obj = { id: userid, name: name, age: age, time: time}
+    _registered.push(obj)
+    fs.writeFileSync('./database/stiker.json', JSON.stringify(_registered))
+}
+
+/**
+ * cek user from db
+ * params {string} userid
+ * return {true/false}
+**/
+const checkRegisteredUser = (userid) => {
+    let status = false
+    Object.keys(_registered).forEach((i) => {
+        if (_registered[i].id === userid) {
+            status = true
+        }
+    })
+    return status
+}
+
+module.exports = {
+	getRegisteredRandomId,
+	addRegisteredUser,
+	checkRegisteredUser
+}
